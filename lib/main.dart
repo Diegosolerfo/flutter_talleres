@@ -3,139 +3,104 @@ import 'package:flutter/material.dart';
 void main() {
   runApp(const MyApp());
 }
-
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: StatePracticePage(),
+      home: HomePage(),
     );
   }
 }
 
-class StatePracticePage extends StatefulWidget {
-  const StatePracticePage({Key? key}) : super(key: key);
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<StatePracticePage> createState() => _StatePracticePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _StatePracticePageState extends State<StatePracticePage> {
+class _HomePageState extends State<HomePage> {
+  List<String> items = [];
 
-  bool showBalance = false; 
-  bool acceptTerms = false; 
-  Color backgroundColor = Colors.white; 
+  @override
+  void initState() {
+    super.initState();
+    print('initState(): Widget creado');
+  }
+
+  @override
+  void dispose() {
+    print('dispose(): Widget eliminado');
+    super.dispose();
+  }
+
+  void addItem() {
+    setState(() {
+      items.add('Elemento ${items.length + 1}');
+      print('setState(): Elemento agregado');
+    });
+  }
+
+  void removeItem(int index) {
+    setState(() {
+      items.removeAt(index);
+      print('setState(): Elemento eliminado');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    print('build(): Construyendo UI');
+
     return Scaffold(
-      backgroundColor: backgroundColor, 
-      appBar: AppBar(
-        title: const Text('State Management Practice'),
+      appBar: AppBar(title: const Text('Ciclo de Vida Flutter')),
+      body: Column(
+        children: [
+          ElevatedButton(
+            onPressed: addItem,
+            child: const Text('Agregar elemento'),
+          ),
+
+          /// Lista mostrada usando StatelessWidget
+          Expanded(
+            child: ItemsList(
+              items: items,
+              onDelete: removeItem,
+            ),
+          ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16), 
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, 
-          children: [
-            const Text(
-              'Bank Balance',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+    );
+  }
+}
 
-            const SizedBox(height: 10),
+class ItemsList extends StatelessWidget {
+  final List<String> items;
+  final Function(int) onDelete;
 
-            Text(
-              showBalance ? '\$ 2,500.00' : '******',
-              style: const TextStyle(fontSize: 26),
-            ),
+  const ItemsList({
+    super.key,
+    required this.items,
+    required this.onDelete,
+  });
 
-            const SizedBox(height: 10),
+  @override
+  Widget build(BuildContext context) {
+    print('ItemsList build(): Dibujando lista');
 
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  showBalance = !showBalance;
-                });
-              },
-              child: Text(showBalance ? 'Hide balance' : 'Show balance'),
-            ),
-
-            const Divider(height: 40),
-
-            const Text(
-              'Checklist',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-
-            CheckboxListTile(
-              title: const Text('Accept terms and conditions'),
-              value: acceptTerms,
-              onChanged: (value) {
-                setState(() {
-                  acceptTerms = value!;
-                });
-              },
-            ),
-
-            Text(
-              acceptTerms ? 'Terms accepted' : 'You must accept the terms',
-              style: TextStyle(
-                color: acceptTerms ? Colors.green : Colors.red,
-              ),
-            ),
-
-            const Divider(height: 40),
-
-            const Text(
-              'Select page color',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 10),
-
-            DropdownButton<Color>(
-              value: backgroundColor,
-              items: const [
-                DropdownMenuItem(
-                  value: Colors.white,
-                  child: Text('White'),
-                ),
-                DropdownMenuItem(
-                  value: Colors.blue,
-                  child: Text('Blue'),
-                ),
-                DropdownMenuItem(
-                  value: Colors.green,
-                  child: Text('Green'),
-                ),
-                DropdownMenuItem(
-                  value: Colors.black,
-                  child: Text('Black'),
-                ),
-              ],
-              onChanged: (color) {
-                setState(() {
-                  backgroundColor = color!;
-                });
-              },
-            ),
-
-            const SizedBox(height: 20),
-
-            Text(
-              'Current state:',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Text('showBalance: $showBalance'),
-            Text('acceptTerms: $acceptTerms'),
-            Text('backgroundColor: $backgroundColor'),
-          ],
-        ),
-      ),
+    return ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          title: Text(items[index]),
+          trailing: IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () => onDelete(index),
+          ),
+        );
+      },
     );
   }
 }
